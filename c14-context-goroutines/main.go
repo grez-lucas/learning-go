@@ -12,8 +12,8 @@ import (
 var ErrSomethingWentWrong = errors.New("something critical went wrong in processing")
 
 func main() {
-	ctx, cancelFunc := context.WithCancel(context.Background())
-	defer cancelFunc()
+	ctx, cancelFunc := context.WithCancelCause(context.Background())
+	defer cancelFunc(nil)
 
 	numOfWorkers := 2
 	errChan := make(chan error, numOfWorkers)
@@ -30,7 +30,7 @@ loop:
 		select {
 		case err := <-errChan:
 			fmt.Printf("Received an error: %v\n", err)
-			cancelFunc()
+			cancelFunc(err)
 		case res := <-respChan:
 			fmt.Printf("Received a result: %v\n", res)
 		case <-ctx.Done():
